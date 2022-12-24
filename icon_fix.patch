@@ -1,0 +1,30 @@
+diff --git a/src/xfpm-manager.c b/src/xfpm-manager.c
+index 9f05bd9a..0f3ba04b 100644
+--- a/src/xfpm-manager.c
++++ b/src/xfpm-manager.c
+@@ -725,10 +725,26 @@ xfpm_manager_tray_update_icon (PowerManagerButton *button, XfpmManager *manager)
+   g_return_if_fail (POWER_MANAGER_IS_BUTTON (manager->priv->power_button));
+ 
+   XFPM_DEBUG ("updating icon");
++  
++  GError         *error = NULL;
++  GdkPixbuf      *pix = NULL;
++  pix = gtk_icon_theme_load_icon (gtk_icon_theme_get_default (),
++                                  power_manager_button_get_icon_name (POWER_MANAGER_BUTTON(manager->priv->power_button)),
++                                  32,
++                                  GTK_ICON_LOOKUP_USE_BUILTIN,
++                                  &error);
++
++  if (!pix) {
++    g_warning ("Couldn’t load icon: %s", error->message);
++    g_error_free (error);
++    return;
++  }
+ 
+ G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+-  gtk_status_icon_set_from_icon_name (manager->priv->adapter_icon, power_manager_button_get_icon_name (POWER_MANAGER_BUTTON(manager->priv->power_button)));
++  gtk_status_icon_set_from_pixbuf (manager->priv->adapter_icon, pix);
++  //gtk_status_icon_set_from_icon_name (manager->priv->adapter_icon, power_manager_button_get_icon_name (POWER_MANAGER_BUTTON(manager->priv->power_button)));
+ G_GNUC_END_IGNORE_DEPRECATIONS
++  g_object_unref (pix);
+ }
